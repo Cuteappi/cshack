@@ -1,6 +1,7 @@
-import { Resend } from "resend";
+import { SentMessageInfo } from "./../../../node_modules/@types/nodemailer/index.d";
 import { EmailTemplate, UnAuthEmail } from "../emailotp";
 import { NextApiRequest, NextApiResponse } from "next";
+import { createTransport } from "nodemailer";
 
 const users = [
     {
@@ -9,27 +10,26 @@ const users = [
     },
 ];
 
-const resend = new Resend("re_WETBEUZt_DPEU4V2E4V6o2Sw9cHbqXTtc");
-
 function getUserByEmail(email: string) {
     if (email === users[0].email) {
         return true;
     }
     return false;
 }
+
 function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000);
 }
+
 export async function POST(req: Request, res: Response) {
     const { email, password } = await req.json();
 
-    let nodemailer = require("nodemailer");
-    const transporter = nodemailer.createTransport({
+    const transporter = createTransport({
         port: 465,
         host: "smtp.gmail.com",
         auth: {
-            user: "solomonrajkumar43@gmail.com",
-            pass: "Nigga_1131",
+            user: "solomonrajkumar42069@gmail.com",
+            pass: "zblm blja vsrv fhrr",
         },
         secure: true,
     });
@@ -51,23 +51,17 @@ export async function POST(req: Request, res: Response) {
             const maildata = {
                 from: "solomonrajkumar42069@gmail.com",
                 to: "solomonrajkumar43@gmail.com",
-                subject: "U R very very bad bad.",
-                html: (
-                    <div>
-                        <h1>Welcome, user!</h1>
-                        <h3>For you my beloved</h3>
-                        <h5>otp</h5>
-                        <h6>{otp}</h6>
-                    </div>
-                ),
+                subject: "pls enjoy your otp",
+                html: `<div><h1>Welcome, user!</h1><h3>For you my beloved</h3><h5>otp</h5><h6>${otp}</h6></div>`,
             };
 
-            if (error) {
-                console.log(error);
-                return Response.json({ error }, { status: 500 });
+            const SentMessageInfo = await transporter.sendMail(maildata);
+            if (SentMessageInfo.rejected) {
+                console.error(SentMessageInfo.response);
+                return Response.json(SentMessageInfo.response);
+            } else if (SentMessageInfo.accepted) {
+                return Response.json("Email sent: " + SentMessageInfo.response);
             }
-
-            return Response.json(data);
         } catch (error) {
             console.log(error);
             return Response.json({ error }, { status: 500 });
@@ -77,19 +71,24 @@ export async function POST(req: Request, res: Response) {
         const timestamp = new Date().toISOString();
         const ip = (req.headers.get("x-forwarded-for") ?? "127.0.0.1").split(",")[0]; // Log failed attempt to JSON file
         try {
-            const { data, error } = await resend.emails.send({
+            const maildata = {
                 from: "solomonrajkumar42069@gmail.com",
                 to: "solomonrajkumar43@gmail.com",
                 subject: "U R very very bad bad.",
-                react: UnAuthEmail(ip),
-            });
+                html: `<div>
+                            <h1>hello, user!</h1>
+                            <h3>Someone logged tried to login with your email!!</h3>
+                            <h5>Their ip ${ip} pls DDOS</h5>
+                        </div>`,
+            };
 
-            if (error) {
-                console.log(error);
-                return Response.json({ error }, { status: 500 });
+            const SentMessageInfo = await transporter.sendMail(maildata);
+            if (SentMessageInfo.rejected) {
+                console.error(SentMessageInfo.response);
+                return Response.json(SentMessageInfo.response);
+            } else if (SentMessageInfo.accepted) {
+                return Response.json("Email sent: " + SentMessageInfo.response);
             }
-
-            return Response.json(data);
         } catch (error) {
             console.log(error);
             return Response.json({ error }, { status: 500 });
